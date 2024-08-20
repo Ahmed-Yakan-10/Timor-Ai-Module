@@ -12,6 +12,10 @@ class CustomTextField extends StatelessWidget {
       cursorColor: Colors.black,
       style: TextStyle(color: Colors.black),
       decoration: InputDecoration(
+        hintText: 'Type a message...',
+        hintStyle: TextStyle(
+          color: Colors.black.withOpacity(0.5),
+        ),
         filled: true,
         fillColor: Colors.white,
         contentPadding: EdgeInsets.all(12),
