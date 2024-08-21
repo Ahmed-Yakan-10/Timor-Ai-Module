@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:motion_toast/motion_toast.dart';
 import 'package:timor_ai/constants.dart';
+import 'package:timor_ai/widgets/animated_speech_container.dart';
 import 'package:timor_ai/widgets/custom_circle_button.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class VirtualAssistant extends StatelessWidget {
   const VirtualAssistant({super.key});
@@ -31,20 +34,14 @@ class VirtualAssistant extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              MotionToast(
-                icon: Icons.info_outline_rounded,
-                primaryColor: Colors.black,
-                title: Text(
-                  "Virtual Assistant",
-                  style: TextStyle(fontSize: 24),
+              showTopSnackBar(
+                Overlay.of(context),
+                CustomSnackBar.info(
+                  backgroundColor: Colors.black,
+                  message:
+                  'Speak with Ai and ask it about any thing',
                 ),
-                description: Text(
-                  "Speak to Ai",
-                  style: TextStyle(fontSize: 20),
-                ),
-                position: MotionToastPosition.top,
-                animationType: AnimationType.fromTop,
-              ).show(context);
+              );
             },
             icon: Icon(
               Icons.info_outline_rounded,
@@ -76,13 +73,16 @@ class VirtualAssistant extends StatelessWidget {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Row(
-
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           const SizedBox(width: 25),
           CustomCircleButton(
             icon: Icons.play_arrow,
             buttonColor: Color(0xff494C4C),
           ),
+          const SizedBox(width: 25),
+          AnimatedSpeechContainer(),
+          const SizedBox(width: 25),
           CustomCircleButton(
             icon: Icons.close,
             buttonColor: Colors.red,
