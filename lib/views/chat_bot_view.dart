@@ -118,6 +118,7 @@ class _ChatBotViewState extends State<ChatBotView> {
           height: 70,
           width: MediaQuery.of(context).size.width,
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               IconButton(
                 onPressed: () {

@@ -39,6 +39,7 @@ dependencies:
   flutter_gemini: ^2.0.5
   rename_app: ^1.6.1
   flutter_launcher_icons: ^0.13.1
+  motion_toast: ^2.11.0
 
 dev_dependencies:
   flutter_test:
