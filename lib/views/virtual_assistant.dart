@@ -1,7 +1,9 @@
 import 'dart:math';
-
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:timor_ai/constants.dart';
 import 'package:timor_ai/widgets/animated_speech_container.dart';
 import 'package:timor_ai/widgets/custom_circle_button.dart';
@@ -17,63 +19,58 @@ class VirtualAssistant extends StatefulWidget {
 }
 
 class _VirtualAssistantState extends State<VirtualAssistant> {
-  SpeechToText speechToText = SpeechToText();
+  final SpeechToText speechToText = SpeechToText();
+  final FlutterTts flutterTts = FlutterTts();
   bool isListening = false;
   bool isInitialized = false;
-  var voiceLevel = 30.0;
+  double voiceLevel = 25.0;
+  String responseText = '';
+  int step = 0;
+  double endHe = 70.0;
+  Timer? timer;
 
-  Future<void> micCheck() async {
+  @override
+  void initState() {
+    super.initState();
+    micCheck();
+    Gemini.init(apiKey: kApi);
+    initTTs();
+  }
+
+  micCheck() async {
     bool mic = await speechToText.initialize();
 
     if (mic) {
-      setState(() {
-        isInitialized = true;
-      });
+      setState(() => isInitialized = true);
     } else {
-      // Show a message to the user and try to initialize again after a delay
-      showTopSnackBar(
-        Overlay.of(context),
-        CustomSnackBar.error(
-          backgroundColor: Colors.red,
-          message:
-              'Microphone access is required to use this feature. Please enable it in your settings.',
-        ),
+      showSnackBar(
+        'Microphone access is required to use this feature. Please enable it in your settings.',
+        Colors.red,
       );
-      // Retry initialization after a delay
       Future.delayed(Duration(seconds: 5), micCheck);
     }
   }
 
   void getVoice() {
     if (!isInitialized) {
-      showTopSnackBar(
-        Overlay.of(context),
-        CustomSnackBar.error(
-          backgroundColor: Colors.red,
-          message:
-              'Speech recognition is not initialized. Please try again later.',
-        ),
+      showSnackBar(
+        'Speech recognition is not initialized. Please try again later.',
+        Colors.red,
       );
       return;
     }
 
     if (!isListening) {
-      setState(() {
-        isListening = true;
-      });
+      setState(() => isListening = true);
       speechToText.listen(
-        partialResults: false,
         listenFor: Duration(minutes: 10),
+        partialResults: false,
         onResult: (result) {
-          print(result);
-          setState(() {
-            isListening = false;
-          });
+          getChatText(result.recognizedWords);
+          setState(() => isListening = false);
         },
         onSoundLevelChange: (level) {
-          setState(() {
-            voiceLevel = max(30, level * 5);
-          });
+          setState(() => voiceLevel = max(30, level * 5));
         },
       );
     } else {
@@ -85,11 +82,116 @@ class _VirtualAssistantState extends State<VirtualAssistant> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    micCheck();
-    Gemini.init(apiKey: kApi);
+  void getChatText(String text) {
+    setState(() => step = 1);
+
+    Gemini.instance.text(text).then(
+          (value) {
+        String output = value?.output.toString() ?? '';
+        setState(() {
+          step = 2;
+          responseText = output;
+        });
+        flutterTts.speak(output);
+      },
+    );
+  }
+
+  initTTs() async {
+    await flutterTts.awaitSpeakCompletion(true);
+    flutterTts.setStartHandler(() {
+      startTimer();
+    });
+    flutterTts.setCompletionHandler(() {
+      timer?.cancel();
+      setState(() {
+        endHe = 70.0;
+        step = 0;
+      });
+    });
+  }
+
+  void startTimer() {
+    timer = Timer.periodic(Duration(milliseconds: 500), (timer) {
+      setState(() {
+        endHe = endHe == 70.0 ? 100.0 : 70.0;
+      });
+    });
+  }
+
+  void cancelSpeech() {
+    flutterTts.stop();
+    setState(() {
+      step = 0;
+      isListening = false;
+    });
+  }
+
+  void showSnackBar(String message, Color backgroundColor) {
+    showTopSnackBar(
+      Overlay.of(context),
+      CustomSnackBar.error(
+        backgroundColor: backgroundColor,
+        message: message,
+      ),
+    );
+  }
+
+  Widget buildAvatarOrAnimation() {
+    if (step == 0) {
+      return Center(
+        child: CircleAvatar(
+          backgroundColor: Colors.white,
+          radius: 125,
+        ),
+      );
+    } else if (step == 1) {
+      return Center(
+        child: Lottie.asset(
+          'assets/images/Animation.json',
+          repeat: true,
+        ),
+      );
+    } else {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(4, (index) {
+          double multiplier = [1.1, 1.25, 1.5, 1.4][index];
+          return Padding(
+            padding: const EdgeInsets.only(right: 2),
+            child: AnimatedContainer(
+              height: endHe * multiplier,
+              width: 40,
+              duration: Duration(milliseconds: 200),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(50),
+              ),
+            ),
+          );
+        }),
+      );
+    }
+  }
+
+  Widget buildStatusText() {
+    String status = '';
+    if (step == 1) {
+      status = 'Loading...';
+    } else if (isListening) {
+      status = 'Listening...';
+    } else {
+      status = 'Tap to start';
+    }
+
+    return Text(
+      status,
+      style: TextStyle(
+        fontSize: 24,
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
+    );
   }
 
   @override
@@ -97,9 +199,7 @@ class _VirtualAssistantState extends State<VirtualAssistant> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
           icon: Icon(
             Icons.arrow_back_ios_new,
             size: 24,
@@ -117,12 +217,9 @@ class _VirtualAssistantState extends State<VirtualAssistant> {
         actions: [
           IconButton(
             onPressed: () {
-              showTopSnackBar(
-                Overlay.of(context),
-                CustomSnackBar.info(
-                  backgroundColor: Colors.black,
-                  message: 'Speak with AI and ask it about anything.',
-                ),
+              showSnackBar(
+                'Speak with AI and ask it about anything.',
+                Colors.black,
               );
             },
             icon: Icon(
@@ -136,46 +233,54 @@ class _VirtualAssistantState extends State<VirtualAssistant> {
       body: Column(
         children: [
           const SizedBox(height: 100),
-          Center(
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              radius: 125,
-            ),
+          buildAvatarOrAnimation(),
+          SizedBox(
+            height: (step == 0)
+                ? 100
+                : step == 1
+                ? 10
+                : 220,
           ),
-          const SizedBox(height: 40),
-          Text(
-            isListening ? 'Listening...' : 'Tap to start',
-            style: TextStyle(
-              fontSize: 24,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          buildStatusText(),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          const SizedBox(width: 25),
           CustomCircleButton(
-            onPressed: () {
-              getVoice();
-            },
-            icon: isListening ? Icon(Icons.pause) : Icon(Icons.play_arrow),
+            onPressed: getVoice,
+            icon: (step == 2)
+                ? Icon(Icons.square)
+                : isListening
+                ? Icon(Icons.pause)
+                : Icon(Icons.play_arrow),
             buttonColor: Color(0xff494C4C),
           ),
-          const SizedBox(width: 25),
-          AnimatedSpeechContainer(
-            height: voiceLevel,
-          ),
-          const SizedBox(width: 25),
+          if (step == 0)
+            Row(
+              children: [
+                Icon(Icons.mic, size: 30),
+                AnimatedSpeechContainer(height: voiceLevel),
+              ],
+            ),
+          if (step == 1)
+            Icon(
+              Icons.mic,
+              size: 30,
+              color: Colors.grey,
+            ),
+          if (step == 2)
+            Icon(
+              Icons.mic,
+              size: 30,
+              color: Colors.grey,
+            ),
           CustomCircleButton(
-            onPressed: () {},
+            onPressed: cancelSpeech,
             icon: Icon(Icons.close),
             buttonColor: Colors.red,
           ),
-          const SizedBox(width: 25),
         ],
       ),
     );

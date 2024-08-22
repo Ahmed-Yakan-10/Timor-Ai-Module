@@ -9,14 +9,10 @@ class AnimatedSpeechContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          Icons.mic,
-          size: 30,
-        ),
         Padding(
           padding: EdgeInsets.only(right: 2),
           child: AnimatedContainer(
-            height: height==30.0?height:height*1.2,
+            height: height==25.0?25.5:height*1.1,
             width: 20,
             duration: Duration(milliseconds: 200),
             decoration: BoxDecoration(
@@ -28,7 +24,7 @@ class AnimatedSpeechContainer extends StatelessWidget {
         Padding(
           padding: EdgeInsets.only(right: 2),
           child: AnimatedContainer(
-            height: height==30.0?height:height*1.44,
+            height: height==25.0?25.5:height*1.2,
             width: 20,
             duration: Duration(milliseconds: 200),
             decoration: BoxDecoration(
@@ -40,7 +36,7 @@ class AnimatedSpeechContainer extends StatelessWidget {
         Padding(
           padding: EdgeInsets.only(right: 2),
           child: AnimatedContainer(
-            height: height==30.0?height:height*1.75,
+            height: height==25.0?25.5:height*1.5,
             width: 20,
             duration: Duration(milliseconds: 200),
             decoration: BoxDecoration(
@@ -52,7 +48,7 @@ class AnimatedSpeechContainer extends StatelessWidget {
         Padding(
           padding: EdgeInsets.only(right: 2),
           child: AnimatedContainer(
-            height: height==30.0?height:height*1.55,
+            height: height==25.0?25.5:height*1.2,
             width: 20,
             duration: Duration(milliseconds: 200),
             decoration: BoxDecoration(
