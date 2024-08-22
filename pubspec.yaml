@@ -44,6 +44,7 @@ dependencies:
   top_snackbar_flutter: ^3.1.0
   flutter_tts: ^4.0.2
   lottie: ^3.1.2
+  flutter_native_splash: ^2.4.1
 
 dev_dependencies:
   flutter_test:
@@ -117,3 +118,6 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/icons/ai.png
