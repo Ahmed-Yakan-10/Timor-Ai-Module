@@ -49,7 +49,7 @@ class Messages extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
+                  child: SelectableText(
                     text,
                     style: TextStyle(
                       color: Colors.white,

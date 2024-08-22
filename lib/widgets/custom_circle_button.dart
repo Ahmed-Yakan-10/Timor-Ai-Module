@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 
 class CustomCircleButton extends StatelessWidget {
-  const CustomCircleButton({super.key, required this.buttonColor, required this.icon});
+    CustomCircleButton(
+      {super.key, required this.buttonColor, required this.icon,required this.onPressed});
 
   final Color buttonColor;
-  final IconData icon;
+  final Widget icon;
+  void Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-      radius: 30,backgroundColor: buttonColor,
-      child: Icon(icon,color: Colors.white,),
+      radius: 30,
+      backgroundColor: buttonColor,
+      child: IconButton(
+        onPressed: onPressed,
+        icon: icon,
+        color: Colors.white,
+      ),
     );
   }
 }

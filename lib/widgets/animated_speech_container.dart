@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class AnimatedSpeechContainer extends StatelessWidget {
-  const AnimatedSpeechContainer({super.key});
+  const AnimatedSpeechContainer({super.key, required this.height});
+
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +16,7 @@ class AnimatedSpeechContainer extends StatelessWidget {
         Padding(
           padding: EdgeInsets.only(right: 2),
           child: AnimatedContainer(
-            height: 30,
+            height: height==30.0?height:height*1.2,
             width: 20,
             duration: Duration(milliseconds: 200),
             decoration: BoxDecoration(
@@ -26,7 +28,7 @@ class AnimatedSpeechContainer extends StatelessWidget {
         Padding(
           padding: EdgeInsets.only(right: 2),
           child: AnimatedContainer(
-            height: 30,
+            height: height==30.0?height:height*1.44,
             width: 20,
             duration: Duration(milliseconds: 200),
             decoration: BoxDecoration(
@@ -38,7 +40,7 @@ class AnimatedSpeechContainer extends StatelessWidget {
         Padding(
           padding: EdgeInsets.only(right: 2),
           child: AnimatedContainer(
-            height: 30,
+            height: height==30.0?height:height*1.75,
             width: 20,
             duration: Duration(milliseconds: 200),
             decoration: BoxDecoration(
@@ -50,7 +52,7 @@ class AnimatedSpeechContainer extends StatelessWidget {
         Padding(
           padding: EdgeInsets.only(right: 2),
           child: AnimatedContainer(
-            height: 30,
+            height: height==30.0?height:height*1.55,
             width: 20,
             duration: Duration(milliseconds: 200),
             decoration: BoxDecoration(
